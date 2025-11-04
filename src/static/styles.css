@@ -142,3 +142,42 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+.participants-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.participants-section h5 {
+  margin-bottom: 8px;
+  color: #1a237e;
+  font-size: 16px;
+}
+
+.participants-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin-top: 6px;
+}
+
+.participants-list li {
+  padding: 6px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  font-size: 14px;
+  color: #444;
+}
+
+.no-participants {
+  font-size: 14px;
+  color: #666;
+  margin-top: 6px;
+}
+
+/* small tweak to visually separate each card when list is long */
+.activity-card {
+  transition: transform 0.08s ease;
+}
+.activity-card:hover {
+  transform: translateY(-3px);
+}
