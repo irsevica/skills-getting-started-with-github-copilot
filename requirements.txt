@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+pytest>=7.4.3
+httpx>=0.25.1  # for async HTTP client in tests
+pytest-asyncio>=0.21.1  # for async test support

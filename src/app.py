@@ -81,15 +81,37 @@ activities = {
 }
 
 
-@app.get("/")
+@app.get("/", response_class=RedirectResponse)
 def root():
-    return RedirectResponse(url="/static/index.html")
+    """Redirect to static index.html"""
+    return RedirectResponse(
+        url="/static/index.html",
+        status_code=307
+    )
 
 
 @app.get("/activities")
 def get_activities():
     return activities
 
+
+@app.delete("/activities/{activity_name}/participants/{email}")
+def remove_from_activity(activity_name: str, email: str):
+    """Remove a student from an activity"""
+    # Validate activity exists
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    # Get the specific activity
+    activity = activities[activity_name]
+    
+    # Check if student is signed up
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=404, detail="Student is not signed up for this activity")
+    
+    # Remove student
+    activity["participants"].remove(email)
+    return {"message": f"Removed {email} from {activity_name}"}
 
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):

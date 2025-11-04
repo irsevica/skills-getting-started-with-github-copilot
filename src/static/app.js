@@ -48,7 +48,46 @@ async function init() {
 
         const ul = card.querySelector('.participants-list') || createParticipantsList(card);
         const li = document.createElement('li');
-        li.textContent = email;
+        
+        const emailSpan = document.createElement('span');
+        emailSpan.textContent = email;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-participant';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Remove participant';
+        deleteBtn.onclick = async (e) => {
+          e.preventDefault();
+          try {
+            const res = await fetch(`/activities/${encodeURIComponent(activityName)}/participants/${encodeURIComponent(email)}`, {
+              method: 'DELETE'
+            });
+            
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => ({}));
+              throw new Error(errBody.detail || 'Failed to remove participant');
+            }
+            
+            li.remove();
+            
+            // If this was the last participant, show the "no participants" message
+            if (!ul.children.length) {
+              ul.remove();
+              const none = document.createElement('p');
+              none.className = 'no-participants info';
+              none.textContent = 'No participants yet';
+              card.querySelector('.participants-section').appendChild(none);
+            }
+            
+            showMessage(`Removed ${email} from ${activityName}`, 'success');
+          } catch (err) {
+            showMessage(err.message || 'Failed to remove participant', 'error');
+            console.error(err);
+          }
+        };
+        
+        li.appendChild(emailSpan);
+        li.appendChild(deleteBtn);
         ul.appendChild(li);
       }
 
@@ -92,7 +131,45 @@ async function init() {
         ul.className = 'participants-list';
         for (const p of a.participants) {
           const li = document.createElement('li');
-          li.textContent = p;
+          const emailSpan = document.createElement('span');
+          emailSpan.textContent = p;
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-participant';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.title = 'Remove participant';
+          deleteBtn.onclick = async (e) => {
+            e.preventDefault();
+            try {
+              const res = await fetch(`/activities/${encodeURIComponent(name)}/participants/${encodeURIComponent(p)}`, {
+                method: 'DELETE'
+              });
+              
+              if (!res.ok) {
+                const errBody = await res.json().catch(() => ({}));
+                throw new Error(errBody.detail || 'Failed to remove participant');
+              }
+              
+              li.remove();
+              
+              // If this was the last participant, show the "no participants" message
+              if (!ul.children.length) {
+                ul.remove();
+                const none = document.createElement('p');
+                none.className = 'no-participants info';
+                none.textContent = 'No participants yet';
+                participantsSection.appendChild(none);
+              }
+              
+              showMessage(`Removed ${p} from ${name}`, 'success');
+            } catch (err) {
+              showMessage(err.message || 'Failed to remove participant', 'error');
+              console.error(err);
+            }
+          };
+          
+          li.appendChild(emailSpan);
+          li.appendChild(deleteBtn);
           ul.appendChild(li);
         }
         participantsSection.appendChild(ul);
@@ -114,20 +191,29 @@ async function init() {
   }
 
   function createParticipantsList(card) {
-    const section = card.querySelector('.participants-section') || (() => {
-      const s = document.createElement('div');
-      s.className = 'participants-section';
-      card.appendChild(s);
-      return s;
-    })();
+    let section = card.querySelector('.participants-section');
+    if (!section) {
+      section = document.createElement('div');
+      section.className = 'participants-section';
+      
+      const header = document.createElement('h5');
+      header.textContent = 'Participants';
+      section.appendChild(header);
+      
+      card.appendChild(section);
+    }
 
-    // remove any "no participants" text
-    const placeholder = section.querySelector('.no-participants');
-    if (placeholder) placeholder.remove();
+    // Find existing list or create new one
+    let ul = section.querySelector('.participants-list');
+    if (!ul) {
+      // remove any "no participants" text first
+      const placeholder = section.querySelector('.no-participants');
+      if (placeholder) placeholder.remove();
 
-    const ul = document.createElement('ul');
-    ul.className = 'participants-list';
-    section.appendChild(ul);
+      ul = document.createElement('ul');
+      ul.className = 'participants-list';
+      section.appendChild(ul);
+    }
     return ul;
   }
 
